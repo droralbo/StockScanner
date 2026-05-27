@@ -31,12 +31,26 @@ def rsi_oversold_recovery(n: int = 60) -> pd.DataFrame:
 
 
 def rsi_overbought_breakdown(n: int = 60) -> pd.DataFrame:
-    up = np.linspace(70, 100, n - 2)
-    drop = [97.0, 94.0]
-    return synth_candles(np.r_[up, drop])
+    # Steep monotonic climb saturates RSI near ~95
+    up = np.linspace(50, 150, n - 3)
+    # Two graduated drops:
+    #   - small drop keeps RSI still above 70 (prev)
+    #   - large drop slams RSI below 70 (last)
+    drops = [148.0, 142.0, 125.0]
+    return synth_candles(np.r_[up, drops])
 
 
 def steady_uptrend(n: int = 80, start: float = 100.0) -> pd.DataFrame:
     closes = np.linspace(start, start * 1.20, n)
     closes = closes + np.sin(np.linspace(0, 8, n)) * 0.3
     return synth_candles(closes)
+
+
+def multi_buy_pattern(n_down: int = 60) -> pd.DataFrame:
+    """Long oversold decline + sharp 2-bar bounce that lands the cross on the LAST bar.
+
+    Designed so RSI, Stochastic, and Bollinger all fire BUY on the same final bar
+    (EMA/MACD lag too much to cross in 2 bars and stay None — that's expected)."""
+    down = np.linspace(100.0, 60.0, n_down)
+    bounce = [62.5, 65.5]
+    return synth_candles(np.r_[down, bounce])

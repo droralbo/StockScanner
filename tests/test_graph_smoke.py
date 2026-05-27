@@ -10,7 +10,7 @@ from src.graph.state import SignalState
 from src.indicators.base import load_all_indicators
 from src.storage.db import SignalStore
 from src.web.broadcaster import SignalBroadcaster
-from tests.fixtures import rsi_oversold_recovery
+from tests.fixtures import multi_buy_pattern
 
 
 class _MockProvider(DataProvider):
@@ -52,7 +52,7 @@ def mock_anthropic():
 
 
 async def test_buy_signal_flows_through_graph(store, broadcaster, mock_anthropic):
-    df = rsi_oversold_recovery()
+    df = multi_buy_pattern()
     provider = _MockProvider(df)
 
     graph = build_signal_graph(
@@ -70,8 +70,9 @@ async def test_buy_signal_flows_through_graph(store, broadcaster, mock_anthropic
         "cooldown_minutes": 60,
         "indicator_configs": [
             {"name": "rsi", "params": {"period": 14, "upper": 70, "lower": 30}},
-            {"name": "macd", "params": {}},
+            {"name": "stochastic", "params": {}},
             {"name": "ema_cross", "params": {"fast": 9, "slow": 21}},
+            {"name": "bbands", "params": {}},
         ],
         "indicator_results": [],
         "suppressed": False,
@@ -91,7 +92,7 @@ async def test_buy_signal_flows_through_graph(store, broadcaster, mock_anthropic
 
 
 async def test_dedup_suppresses_second_identical_signal(store, broadcaster, mock_anthropic):
-    df = rsi_oversold_recovery()
+    df = multi_buy_pattern()
     provider = _MockProvider(df)
     graph = build_signal_graph(
         provider=provider,
@@ -108,8 +109,9 @@ async def test_dedup_suppresses_second_identical_signal(store, broadcaster, mock
         "cooldown_minutes": 60,
         "indicator_configs": [
             {"name": "rsi", "params": {}},
-            {"name": "macd", "params": {}},
+            {"name": "stochastic", "params": {}},
             {"name": "ema_cross", "params": {}},
+            {"name": "bbands", "params": {}},
         ],
         "indicator_results": [],
         "suppressed": False,

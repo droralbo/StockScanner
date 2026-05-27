@@ -22,12 +22,12 @@ class RSI(Indicator):
 
         signal: str | None = None
         reason = f"RSI={last:.1f}"
-        if prev < upper <= last:
-            signal = "SELL"
-            reason = f"RSI חצה {upper:.0f} כלפי מעלה ({prev:.1f}→{last:.1f}) — Overbought"
-        elif prev > lower >= last:
+        if prev <= lower < last:
             signal = "BUY"
-            reason = f"RSI חצה {lower:.0f} כלפי מטה ({prev:.1f}→{last:.1f}) — Oversold"
+            reason = f"RSI יצא מ-Oversold ({prev:.1f}→{last:.1f}) — Recovery"
+        elif prev >= upper > last:
+            signal = "SELL"
+            reason = f"RSI נשבר מ-Overbought ({prev:.1f}→{last:.1f}) — Breakdown"
 
         return IndicatorResult(
             name=self.name,
@@ -54,17 +54,28 @@ class Stochastic(Indicator):
 
         stoch = ta.stoch(df["high"], df["low"], df["close"], k=k_period, d=d_period)
         k_col, d_col = stoch.columns[0], stoch.columns[1]
-        k_last, k_prev = float(stoch[k_col].iloc[-1]), float(stoch[k_col].iloc[-2])
-        d_last, d_prev = float(stoch[d_col].iloc[-1]), float(stoch[d_col].iloc[-2])
+        k_last, d_last = float(stoch[k_col].iloc[-1]), float(stoch[d_col].iloc[-1])
+
+        # Detect cross within the last 3 bars (hysteresis — realistic for slow signals)
+        k_recent = stoch[k_col].iloc[-4:].values
+        d_recent = stoch[d_col].iloc[-4:].values
+        bull_cross = any(
+            k_recent[i] < d_recent[i] and k_recent[i + 1] > d_recent[i + 1]
+            for i in range(len(k_recent) - 1)
+        ) and k_last > d_last
+        bear_cross = any(
+            k_recent[i] > d_recent[i] and k_recent[i + 1] < d_recent[i + 1]
+            for i in range(len(k_recent) - 1)
+        ) and k_last < d_last
 
         signal: str | None = None
         reason = f"%K={k_last:.1f} %D={d_last:.1f}"
-        if k_prev < d_prev and k_last > d_last and k_last < lower + 10:
+        if bull_cross and k_last < lower + 30:
             signal = "BUY"
-            reason = f"Stoch bullish cross באזור oversold (%K={k_last:.1f})"
-        elif k_prev > d_prev and k_last < d_last and k_last > upper - 10:
+            reason = f"Stoch bullish cross יוצא מ-Oversold (%K={k_last:.1f})"
+        elif bear_cross and k_last > upper - 30:
             signal = "SELL"
-            reason = f"Stoch bearish cross באזור overbought (%K={k_last:.1f})"
+            reason = f"Stoch bearish cross יוצא מ-Overbought (%K={k_last:.1f})"
 
         return IndicatorResult(
             name=self.name,
