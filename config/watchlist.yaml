@@ -1,0 +1,38 @@
+# Stock watchlist + indicator configuration
+#
+# To add a new symbol: add an entry under `symbols`.
+# To add a new indicator: register a new class under src/indicators/ with @register,
+# then reference it here by name. No code changes needed elsewhere.
+
+defaults:
+  interval: "5"          # marketdata.app resolution (1, 5, 15, 30, 60, D, W, M)
+  cooldown_minutes: 60   # min minutes between identical signals
+  candles_limit: 200
+
+symbols:
+  - symbol: AAPL
+    indicators:
+      - { name: rsi,        period: 14, upper: 70, lower: 30 }
+      - { name: macd,       fast: 12, slow: 26, signal: 9 }
+      - { name: bbands,     period: 20, std: 2 }
+      - { name: ema_cross,  fast: 9, slow: 21 }
+
+  - symbol: NVDA
+    indicators:
+      - { name: rsi }
+      - { name: adx,        period: 14, threshold: 25 }
+      - { name: vwap }
+      - { name: macd }
+
+  - symbol: TSLA
+    indicators:
+      - { name: rsi,        period: 14, upper: 75, lower: 25 }
+      - { name: bbands }
+      - { name: atr,        period: 14 }
+      - { name: stochastic, k: 14, d: 3 }
+
+  - symbol: MSFT
+    indicators:
+      - { name: rsi }
+      - { name: macd }
+      - { name: obv }

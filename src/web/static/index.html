@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Signals — Live Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot" id="ws-dot"></span>
+      <h1>Stock Signals</h1>
+    </div>
+    <div class="meta">
+      <span id="ws-status">Connecting…</span>
+      <span id="signal-count">0 signals</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="symbols-panel">
+      <h2>מניות במעקב</h2>
+      <div id="symbols-list" class="symbols-grid"></div>
+    </section>
+
+    <section class="panel" id="signals-panel">
+      <div class="panel-head">
+        <h2>Signals — Live Feed</h2>
+        <div class="filters">
+          <select id="filter-symbol"><option value="">All symbols</option></select>
+          <select id="filter-action">
+            <option value="">All actions</option>
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+        </div>
+      </div>
+      <div id="signals-list" class="signals-list"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
